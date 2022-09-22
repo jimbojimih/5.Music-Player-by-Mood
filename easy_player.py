@@ -1,6 +1,4 @@
 from ytmusicapi import YTMusic
-from pytube import YouTube
-import pygame
 from moviepy.editor import AudioFileClip
 import os
 import pafy
@@ -9,6 +7,7 @@ basepath = os.path.dirname(os.path.abspath(__file__))
 dllspath = os.path.join(basepath, 'dlls')
 os.environ['PATH'] = dllspath + os.pathsep + os.environ['PATH']
 import mpv
+
 mood_dict = {}
 ytmusic = YTMusic()
 ytmusic.setup
