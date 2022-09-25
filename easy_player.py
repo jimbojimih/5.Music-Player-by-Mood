@@ -1,6 +1,5 @@
 import os
 import time
-from tkinter import *
 
 from ytmusicapi import YTMusic
 import pafy
@@ -40,45 +39,29 @@ player = mpv.MPV(ytdl=True) #ytdl=True
 player.playlist_append(audio_url)
 #print(player.volume)
 #self.mpv_player.playlist_clear()
-def pause():
-    player.pause = True
-def resume():
-    player.pause = False
-def play():   
-    player.playlist_pos = 0
-
-              
-root = Tk()
-root.geometry('600x300')    
-Label(root, text = 'g', font='lucidia 30 bold').pack()
-Button(text='play', command=play).place(x=200, y=100)
-Button(text='pause', command=pause).place(x=250, y=100)
-Button(text='resume', command=resume).place(x=150, y=100)
-root.mainloop()
+player.pause = True
+player.playlist_pos = 0
 
 
-'''
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, player):
         super().__init__()
+        self.player = player
+        self.setWindowTitle("Easy Player")
+        self.button = QPushButton("Play")
+        self.button.setCheckable(True)
+        self.button.clicked.connect(self.play)
+        self.setCentralWidget(self.button)
 
-        self.setWindowTitle("My App")
-
-        button = QPushButton("Press Me!")
-        button.setCheckable(True)
-        button.clicked.connect(self.the_button_was_clicked)
-
-        # Устанавливаем центральный виджет Window.
-        self.setCentralWidget(button)
-
-    def the_button_was_clicked(self):
-        print("Clicked!")
-
-
+    def play(self, checked):
+        self.player.pause = not checked
+        if self.button.text() == "Play":
+            self.button.setText('Pause')
+        else: self.button.setText("Play")
 app = QApplication([])
 
-window = MainWindow()
+window = MainWindow(player)
 window.show()
 
 app.exec()
-'''
+
