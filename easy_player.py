@@ -4,7 +4,15 @@ import time
 from ytmusicapi import YTMusic
 import pafy
 from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton
+from PyQt6.QtWidgets import (    
+    QDial,
+    QPushButton,
+    QRadioButton,
+    QMainWindow,
+    QApplication,
+    QVBoxLayout,
+    QWidget
+)
 
 basepath = os.path.dirname(os.path.abspath(__file__))
 dllspath = os.path.join(basepath, 'dlls')
@@ -37,7 +45,6 @@ audio_url = audio.url
 
 player = mpv.MPV(ytdl=True) #ytdl=True
 player.playlist_append(audio_url)
-#print(player.volume)
 #self.mpv_player.playlist_clear()
 player.pause = True
 player.playlist_pos = 0
@@ -48,16 +55,37 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.player = player
         self.setWindowTitle("Easy Player")
+
+        layout = QVBoxLayout()
+
+        widget = QWidget()
+        widget.setLayout(layout)
+
         self.button = QPushButton("Play")
         self.button.setCheckable(True)
         self.button.clicked.connect(self.play)
-        self.setCentralWidget(self.button)
+
+        self.dial = QDial()
+        self.dial.setRange(0, 100)
+        self.dial.setValue(100)
+        self.dial.valueChanged.connect(self.volume)
+
+        layout.addWidget(self.button)
+        layout.addWidget(self.dial)
+        
+
+        self.setCentralWidget(widget)
 
     def play(self, checked):
         self.player.pause = not checked
         if self.button.text() == "Play":
             self.button.setText('Pause')
         else: self.button.setText("Play")
+
+    def volume(self, value):
+        player.volume = value
+        print(value)
+
 app = QApplication([])
 
 window = MainWindow(player)
