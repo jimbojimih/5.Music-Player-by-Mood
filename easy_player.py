@@ -12,7 +12,12 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QApplication,
     QVBoxLayout,
-    QWidget
+    QHBoxLayout,
+    QWidget,
+    QComboBox,
+    QSlider,
+    QLabel,
+    QGridLayout
 )
 
 basepath = os.path.dirname(os.path.abspath(__file__))
@@ -21,7 +26,6 @@ os.environ['PATH'] = dllspath + os.pathsep + os.environ['PATH']
 
 import mpv
 
-json_file = {}
 dict_mood_and_parametrs = {}
 ytmusic = YTMusic()
 ytmusic.setup 
@@ -59,6 +63,7 @@ video_url = "https://www.youtube.com/watch?v=" + hss['Chill'][0][0]
 video = pafy.new(video_url)
 audio = video.getbestaudio()
 audio_url = audio.url
+print(video.title)
 
 
 
@@ -69,34 +74,63 @@ player.pause = True
 player.playlist_pos = 0
 
 
-class MainWindow(QMainWindow):
-    def __init__(self, player):
+class MainWindow(QWidget):
+    def __init__(self, player, video):
         super().__init__()
-        self.player = player
-        self.setWindowTitle("Easy Player")
-        self.setFixedWidth(300)
-        self.setFixedHeight(300)
-        layout = QVBoxLayout()
+        self.player = player 
+        self.video = video
+        #self.setStyleSheet("background-color: black;")
 
-        widget = QWidget()
-        widget.setLayout(layout)
+        self.button_return = QPushButton("<--")
+        self.button_return.setFixedSize(85, 30) 
+        #self.button_return.setFont((QFont('Arial', 8)))
+        #self.button_return.clicked.connect(self.play)
 
         self.button = QPushButton("Play")
-        self.button.setCheckable(True)
-        self.button.setGeometry(100, 100, 600, 400)        
+        self.button.setCheckable(True)   
+        self.button.setFixedSize(85, 30) 
         self.button.clicked.connect(self.play)
 
-        self.dial = QDial()
-        self.dial.setRange(0, 100)
-        self.dial.setValue(100)
-        self.dial.valueChanged.connect(self.volume)
+        self.skeep = QPushButton("-->") 
+        self.skeep.setFixedSize(85, 30) 
+        #self.skeep.clicked.connect(self.play)
 
-        layout.addWidget(self.button)
-        layout.addWidget(self.dial)
+        self.slider = QSlider(Qt.Orientation.Horizontal)
+        self.slider.setRange(0, 100)
+        self.slider.setValue(100)
+        self.slider.setFixedSize(85, 20)
+        self.slider.valueChanged.connect(self.volume)
+
+        self.choice = QComboBox()
+        self.choice.setFixedSize(85, 30)
+        self.choice.addItems(["Chill", "Power", "Three"])
+
+        title = self.video.title
+        self.name = QLabel(title)
         
+        layout1 = QHBoxLayout()  #layout = QVBoxLayout()
 
-        self.setCentralWidget(widget)
+        layout1.addWidget(self.button_return)
+        layout1.addWidget(self.button)
+        layout1.addWidget(self.skeep)
+        
+        layout2 = QHBoxLayout()
+        layout2.addWidget(self.slider)        
+        layout2.addWidget(self.choice)
 
+        layout3 = QVBoxLayout()  #layout = QVBoxLayout()
+        layout3.addLayout(layout1)  
+        layout3.addStretch(1) 
+        layout3.addLayout(layout2) 
+        layout3.addStretch(1)    
+                        
+        layout3.addWidget(self.name) 
+
+        self.setLayout(layout3)
+        self.setWindowTitle("Easy Player")
+        self.setFixedWidth(300)
+        self.setFixedHeight(130)
+        self.show()
     def play(self, checked):
         self.player.pause = not checked
         if self.button.text() == "Play":
@@ -108,7 +142,7 @@ class MainWindow(QMainWindow):
 
 app = QApplication([])
 
-window = MainWindow(player)
+window = MainWindow(player, video)
 window.show()
 
 app.exec()
