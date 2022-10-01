@@ -1,10 +1,9 @@
 import os
-import time
-
 import json
+
 from ytmusicapi import YTMusic
 import pafy
-from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (    
     QDial,
     QPushButton,
@@ -17,55 +16,98 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QSlider,
     QLabel,
-    QGridLayout
+    QGridLayout,
 )
 
 basepath = os.path.dirname(os.path.abspath(__file__))
 dllspath = os.path.join(basepath, 'dlls')
 os.environ['PATH'] = dllspath + os.pathsep + os.environ['PATH']
-
 import mpv
 
-dict_mood_and_parametrs = {}
-ytmusic = YTMusic()
-ytmusic.setup 
+
+class PlayListCreator():
+    '''Get the url of the audio to be played by the player.'''
+    def __init__(self):
+        self.play_lists_json = {}
+        self.ytmusic = YTMusic()         
+
+    def create_mood_param_dict(self):
+        '''Get a dictionary with mood parameters. 
+
+        Example: "{'Chill': 'ggMPOg1uX0prdzllTXdBWmdM'..."
+
+        '''
+        self.ytmusic.setup
+        mood_dict = self.ytmusic.get_mood_categories()
+        for mood in mood_dict['Moods & moments']:
+            self.play_lists_json[mood['title']] = mood['params']
+
+    def create_mood_playlists_id_dict(self):
+        '''Get a dictionary with mood playlists.
+
+        Example: "{'Chill': [{'title': 'Russian Lounge', 
+
+                'playlistId': 'RDCLAK5uy_lFLL3kvPVwDnLJYBQuRmtP3-1_w63yUS'..."
+
+        '''
+        self.create_mood_param_dict()
+        for mood, params in self.play_lists_json.items():
+            self.play_lists_json[mood] = self.ytmusic.get_mood_playlists(params)        
+
+    def create_clean_mood_playlists_id_dict(self):
+        '''Get a dictionary with clean mood playlists.
+
+        Example: "{'Chill': ['RDCLAK5uy_lFLL3kvPVwDnLJYBQuRmtP3-1_w63yUS',..."
+
+        '''
+        self.create_mood_playlists_id_dict()
+        for mood, params in self.play_lists_json.items(): 
+            list_playlist_id = []   
+            for param in params:
+                    list_playlist_id.append(param['playlistId'])
+            self.play_lists_json[mood] = list_playlist_id
+
+    def create_mood_list_of_video_id_dict(self):
+        '''Get a dictionary with clean mood playlists.
+
+        Example: "{"Chill": [["e4PBKgLlaHk", "WaryKVQ1rhk"], 
+                            [""0ZSWUAOYlSA", "dRHBDPpex1Y"]...
+
+        '''
+        self.create_clean_mood_playlists_id_dict()
+        for mood, params in self.play_lists_json.items():
+            list_all_video_id = []
+            for param in params:
+                tracks_from_playlist = []
+                tracks_from_playlist_raw = self.ytmusic.get_playlist(param)['tracks']
+                for track in tracks_from_playlist_raw:
+                    video_id = track['videoId']
+                    tracks_from_playlist.append(video_id)
+                list_all_video_id.append(tracks_from_playlist)
+            self.play_lists_json[mood] = list_all_video_id
+
+    def create_json(self):
+        self.create_mood_list_of_video_id_dict()
+        with open('play_lists.json', 'w') as hs:
+            json.dump(self.play_lists_json, hs) 
+
+a = PlayListCreator()
+a.create_json()
 '''
-mood_dict = ytmusic.get_mood_categories()
-for a in mood_dict['Moods & moments']:
-    dict_mood_and_parametrs[a['title']] = a['params']
-
-for mood, param in dict_mood_and_parametrs.items():
-    dict_mood_and_parametrs[mood] = ytmusic.get_mood_playlists(param)
-
-for mood, param in dict_mood_and_parametrs.items(): 
-    list_playlist_id = []   
-    for p in param:
-        list_playlist_id.append(p['playlistId'])
-    dict_mood_and_parametrs[mood] = list_playlist_id
-
-for mood, param in dict_mood_and_parametrs.items():
-    list_video_id = []
-    for p in param:
-        tracks_from_playlist = []
-        tracks_from_playlist_raw = ytmusic.get_playlist(p)['tracks']
-        for video_id in tracks_from_playlist_raw:
-            tracks_from_playlist.append(video_id['videoId'])
-        list_video_id.append(tracks_from_playlist)
-    dict_mood_and_parametrs[mood] = list_video_id
-
-with open('hight_score.json', 'w') as hs:
-            json.dump(dict_mood_and_parametrs, hs) 
+def video_id_to_url(video_id):
+    video_url = "https://www.youtube.com/watch?v=" + str(video_id)
+    try:
+        video = pafy.new(video_url)
+    except: return None
+    else:
+        audio = video.getbestaudio()
+        audio_url = audio.url
+    return audio_url
+'''
 
 '''
-with open('hight_score.json', 'r') as hs:
+with open('play_lists.json', 'r') as hs:
             hss = json.load(hs)
-video_url = "https://www.youtube.com/watch?v=" + hss['Chill'][0][0]
-video = pafy.new(video_url)
-audio = video.getbestaudio()
-audio_url = audio.url
-print(video.title)
-
-
 
 player = mpv.MPV(ytdl=True) #ytdl=True
 player.playlist_append(audio_url)
@@ -146,3 +188,4 @@ window = MainWindow(player, video)
 window.show()
 
 app.exec()
+'''
