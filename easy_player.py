@@ -116,11 +116,34 @@ class AudioLinkCreator():
         return self.video.title
 
 
+class PlaybackControl():
+    def __init__(self):
+        self.audio_link = AudioLinkCreator()
+        self.audio_link.open_play_lists_json()
+        self.audio_link.open_video_id('Chill', 0, 0)
+        link = self.audio_link.get_url()
+
+        self.player = mpv.MPV(ytdl=True) #ytdl=True
+        self.player.playlist_append(link)
+        #self.mpv_player.playlist_clear()
+        self.player.pause = True
+        self.player.playlist_pos = 0 
+
+    def play(self, checked):
+        self.player.pause = not checked
+
+    def set_volume(self, value):
+        self.player.volume = value
+
+    def get_title(self):
+        return self.audio_link.get_title()
+
+
+
 class MainWindow(QWidget):
-    def __init__(self, player, video):
+    def __init__(self):
         super().__init__()
-        self.player = player 
-        self.video = video
+        self.playback_control = PlaybackControl()
         #self.setStyleSheet("background-color: yellow;")
 
         self.button_return = QPushButton("<--")
@@ -143,12 +166,12 @@ class MainWindow(QWidget):
         self.slider.valueChanged.connect(self.volume)
 
         self.choice = QComboBox()
-        self.choice.setFixedSize(85, 30)
+        self.choice.setFixedSize(90, 30)
         self.choice.addItems(["Chill", "Commute", "Energy Boosters"])
         self.choice.addItems(["Feel Good", "Focus", "Party"])
         self.choice.addItems(["Romance", "Sleep", "Workout"])
 
-        title = self.video.title
+        title = self.playback_control.get_title()
         self.name = QLabel(title)
         
         layout1 = QHBoxLayout()  
@@ -176,29 +199,20 @@ class MainWindow(QWidget):
         self.show()
 
     def play(self, checked):
-        self.player.pause = not checked
+        self.playback_control.play(checked)
         if self.button.text() == "Play":
             self.button.setText('Pause')
         else: self.button.setText("Play")
 
     def volume(self, value):
-        player.volume = value
+        self.playback_control.set_volume(value)
 
-audio_link_creator = AudioLinkCreator()
-audio_link_creator.open_play_lists_json()
-audio_link_creator.open_video_id('Chill', 0, 0)
-link = audio_link_creator.get_url()
-
-player = mpv.MPV(ytdl=True) #ytdl=True
-player.playlist_append(link)
-#self.mpv_player.playlist_clear()
-player.pause = True
-player.playlist_pos = 0
+#if __name__ == '__main__':  
 
 
 app = QApplication([])
 
-window = MainWindow(player, video)
+window = MainWindow()
 window.show()
 
 app.exec()
