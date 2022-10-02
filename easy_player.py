@@ -91,29 +91,29 @@ class PlayListCreator():
         with open('play_lists.json', 'w') as hs:
             json.dump(self.play_lists_json, hs) 
 
-a = PlayListCreator()
-a.create_json()
-'''
-def video_id_to_url(video_id):
-    video_url = "https://www.youtube.com/watch?v=" + str(video_id)
-    try:
-        video = pafy.new(video_url)
-    except: return None
-    else:
-        audio = video.getbestaudio()
-        audio_url = audio.url
-    return audio_url
-'''
 
-'''
-with open('play_lists.json', 'r') as hs:
-            hss = json.load(hs)
+class AudioLinkCreator():
+    def open_play_lists_json(self):
+        with open('play_lists.json', 'r') as file:
+            self.videos_id = json.load(file)
 
-player = mpv.MPV(ytdl=True) #ytdl=True
-player.playlist_append(audio_url)
-#self.mpv_player.playlist_clear()
-player.pause = True
-player.playlist_pos = 0
+    def open_video_id(self, mood, playlist, track):
+        self.video_url = ("https://www.youtube.com/watch?v=" + 
+                        str(self.videos_id[mood][playlist][track]))
+        try: 
+            self.video = pafy.new(self.video_url)
+        except: 
+            self.audio_url = None   
+        else:
+            self.audio = self.video.getbestaudio()
+            self.audio_url = self.audio.url
+            self.audio_title = self.video.title
+        
+    def get_url(self):
+        return self.audio_url
+
+    def get_title(self):
+        return self.video.title
 
 
 class MainWindow(QWidget):
@@ -121,11 +121,10 @@ class MainWindow(QWidget):
         super().__init__()
         self.player = player 
         self.video = video
-        #self.setStyleSheet("background-color: black;")
+        #self.setStyleSheet("background-color: yellow;")
 
         self.button_return = QPushButton("<--")
         self.button_return.setFixedSize(85, 30) 
-        #self.button_return.setFont((QFont('Arial', 8)))
         #self.button_return.clicked.connect(self.play)
 
         self.button = QPushButton("Play")
@@ -145,12 +144,14 @@ class MainWindow(QWidget):
 
         self.choice = QComboBox()
         self.choice.setFixedSize(85, 30)
-        self.choice.addItems(["Chill", "Power", "Three"])
+        self.choice.addItems(["Chill", "Commute", "Energy Boosters"])
+        self.choice.addItems(["Feel Good", "Focus", "Party"])
+        self.choice.addItems(["Romance", "Sleep", "Workout"])
 
         title = self.video.title
         self.name = QLabel(title)
         
-        layout1 = QHBoxLayout()  #layout = QVBoxLayout()
+        layout1 = QHBoxLayout()  
 
         layout1.addWidget(self.button_return)
         layout1.addWidget(self.button)
@@ -160,7 +161,7 @@ class MainWindow(QWidget):
         layout2.addWidget(self.slider)        
         layout2.addWidget(self.choice)
 
-        layout3 = QVBoxLayout()  #layout = QVBoxLayout()
+        layout3 = QVBoxLayout()  
         layout3.addLayout(layout1)  
         layout3.addStretch(1) 
         layout3.addLayout(layout2) 
@@ -173,6 +174,7 @@ class MainWindow(QWidget):
         self.setFixedWidth(300)
         self.setFixedHeight(130)
         self.show()
+
     def play(self, checked):
         self.player.pause = not checked
         if self.button.text() == "Play":
@@ -182,10 +184,21 @@ class MainWindow(QWidget):
     def volume(self, value):
         player.volume = value
 
+audio_link_creator = AudioLinkCreator()
+audio_link_creator.open_play_lists_json()
+audio_link_creator.open_video_id('Chill', 0, 0)
+link = audio_link_creator.get_url()
+
+player = mpv.MPV(ytdl=True) #ytdl=True
+player.playlist_append(link)
+#self.mpv_player.playlist_clear()
+player.pause = True
+player.playlist_pos = 0
+
+
 app = QApplication([])
 
 window = MainWindow(player, video)
 window.show()
 
 app.exec()
-'''
