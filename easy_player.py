@@ -128,17 +128,16 @@ class LastTrackPlayed():
 
 class PlaybackControl():
     def __init__(self):
-        self.mood = 'Chill'
+        #self.mood = 'Chill'
         self.audio_link = AudioLinkCreator()
         self.audio_link.open_play_lists_json()
-        self.audio_link.open_video_id(self.mood, 0, 0)
-        link = self.audio_link.get_url()
+        
 
         self.player = mpv.MPV(ytdl=True) #ytdl=True
-        self.player.playlist_append(link)
-        #self.mpv_player.playlist_clear()
+        
+        
         self.player.pause = True
-        self.player.playlist_pos = 0 
+        
 
     def play(self, checked):
         self.player.pause = not checked
@@ -149,9 +148,15 @@ class PlaybackControl():
     def get_title(self):
         return self.audio_link.get_title()
 
-    def set_mood(self, mood):
+    def set_mood(self, mood='Chill'):
         self.mood = mood
 
+        self.audio_link.open_video_id(self.mood, 0, 0)
+        link = self.audio_link.get_url()
+        self.player.stop()
+        self.player.playlist_clear()
+        self.player.playlist_append(link)
+        self.player.playlist_pos = 0
 
 
 
@@ -188,8 +193,8 @@ class MainWindow(QWidget):
         self.choice.currentTextChanged.connect(self.set_mood)
 
 
-        title = self.playback_control.get_title()
-        self.name = QLabel(title)
+        #title = self.playback_control.get_title()
+        self.name = QLabel('gg')
         
         layout1 = QHBoxLayout()  
 
