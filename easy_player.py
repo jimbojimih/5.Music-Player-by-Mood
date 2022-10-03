@@ -102,7 +102,7 @@ class AudioLinkCreator():
                         str(self.videos_id[mood][playlist][track]))
         try: 
             self.video = pafy.new(self.video_url)
-        except: 
+        except Exception: 
             self.audio_url = None   
         else:
             self.audio = self.video.getbestaudio()
@@ -116,11 +116,22 @@ class AudioLinkCreator():
         return self.video.title
 
 
+class LastTrackPlayed():
+    def save_the_last_track(self):
+        with open('last_track.json', 'w') as file:
+            json.dump(self.last_track, file)
+
+    def open_the_last_track(self):
+        with open('last_track.json', 'r') as file:
+            self.last_track = json.load(file)
+
+
 class PlaybackControl():
     def __init__(self):
+        self.mood = 'Chill'
         self.audio_link = AudioLinkCreator()
         self.audio_link.open_play_lists_json()
-        self.audio_link.open_video_id('Chill', 0, 0)
+        self.audio_link.open_video_id(self.mood, 0, 0)
         link = self.audio_link.get_url()
 
         self.player = mpv.MPV(ytdl=True) #ytdl=True
@@ -137,6 +148,10 @@ class PlaybackControl():
 
     def get_title(self):
         return self.audio_link.get_title()
+
+    def set_mood(self, mood):
+        self.mood = mood
+
 
 
 
@@ -166,10 +181,12 @@ class MainWindow(QWidget):
         self.slider.valueChanged.connect(self.volume)
 
         self.choice = QComboBox()
-        self.choice.setFixedSize(90, 30)
+        self.choice.setFixedSize(100, 30)
         self.choice.addItems(["Chill", "Commute", "Energy Boosters"])
         self.choice.addItems(["Feel Good", "Focus", "Party"])
         self.choice.addItems(["Romance", "Sleep", "Workout"])
+        self.choice.currentTextChanged.connect(self.set_mood)
+
 
         title = self.playback_control.get_title()
         self.name = QLabel(title)
@@ -206,6 +223,10 @@ class MainWindow(QWidget):
 
     def volume(self, value):
         self.playback_control.set_volume(value)
+
+    def set_mood(self, currentText):
+        self.playback_control.set_mood(currentText)
+        
 
 #if __name__ == '__main__':  
 
