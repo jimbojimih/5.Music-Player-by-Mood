@@ -130,14 +130,10 @@ class PlaybackControl():
     def __init__(self):
         #self.mood = 'Chill'
         self.audio_link = AudioLinkCreator()
-        self.audio_link.open_play_lists_json()
-        
+        self.audio_link.open_play_lists_json()        
 
-        self.player = mpv.MPV(ytdl=True) #ytdl=True
-        
-        
-        self.player.pause = True
-        
+        self.player = mpv.MPV(ytdl=True) #ytdl=True  
+        self.player.pause = True        
 
     def play(self, checked):
         self.player.pause = not checked
@@ -164,6 +160,7 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.playback_control = PlaybackControl()
+        self.playback_control.set_mood()
         #self.setStyleSheet("background-color: yellow;")
 
         self.button_return = QPushButton("<--")
@@ -192,9 +189,8 @@ class MainWindow(QWidget):
         self.choice.addItems(["Romance", "Sleep", "Workout"])
         self.choice.currentTextChanged.connect(self.set_mood)
 
-
-        #title = self.playback_control.get_title()
-        self.name = QLabel('gg')
+        title = self.playback_control.get_title()
+        self.name = QLabel(title)
         
         layout1 = QHBoxLayout()  
 
@@ -231,8 +227,8 @@ class MainWindow(QWidget):
 
     def set_mood(self, currentText):
         self.playback_control.set_mood(currentText)
-        
-
+        title = self.playback_control.get_title()
+        self.name.setText(title)
 #if __name__ == '__main__':  
 
 
