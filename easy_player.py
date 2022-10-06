@@ -4,20 +4,16 @@ import json
 from ytmusicapi import YTMusic
 import pafy
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import (    
-    QDial,
-    QPushButton,
-    QRadioButton,
-    QMainWindow,
-    QApplication,
-    QVBoxLayout,
-    QHBoxLayout,
-    QWidget,
-    QComboBox,
-    QSlider,
-    QLabel,
-    QGridLayout,
-)
+from PyQt6.QtWidgets import (  
+        QPushButton,
+        QMainWindow,
+        QApplication,
+        QVBoxLayout,
+        QHBoxLayout,
+        QWidget,
+        QComboBox,
+        QSlider,
+        QLabel)
 
 basepath = os.path.dirname(os.path.abspath(__file__))
 dllspath = os.path.join(basepath, 'dlls')
@@ -107,7 +103,7 @@ class AudioLinkCreator():
         else:
             self.audio = self.video.getbestaudio()
             self.audio_url = self.audio.url
-            self.audio_title = self.video.title
+            self.audio_title = self.audio.title
         
     def get_url(self):
         return self.audio_url
@@ -115,15 +111,8 @@ class AudioLinkCreator():
     def get_title(self):
         return self.video.title
 
-
-class LastTrackPlayed():
-    def save_the_last_track(self):
-        with open('last_track.json', 'w') as file:
-            json.dump(self.last_track, file)
-
-    def open_the_last_track(self):
-        with open('last_track.json', 'r') as file:
-            self.last_track = json.load(file)
+    def get_len_playlist(self, mood, playlist):
+        return len(self.videos_id[mood][playlist])
 
 
 class PlaybackControl():
@@ -152,8 +141,26 @@ class PlaybackControl():
         self.player.stop()
         self.player.playlist_clear()
         self.player.playlist_append(link)
+        #if self.player.playlist[0]['playing'] == False:
         self.player.playlist_pos = 0
+        #self.playlist_append()
+        print(self.player.playlist[0]['playing'])
 
+    def playlist_append(self):
+        len_playlist =  self.audio_link.get_len_playlist(self.mood, 0)
+        for track in range(1, len_playlist):
+            self.audio_link.open_video_id(self.mood, 0, track)
+            link = self.audio_link.get_url()
+            self.player.playlist_append(link)
+
+class LastTrackPlayed():
+    def save_the_last_track(self):
+        with open('last_track.json', 'w') as file:
+            json.dump(self.last_track, file)
+
+    def open_the_last_track(self):
+        with open('last_track.json', 'r') as file:
+            self.last_track = json.load(file)
 
 
 class MainWindow(QWidget):
@@ -161,16 +168,20 @@ class MainWindow(QWidget):
         super().__init__()
         self.playback_control = PlaybackControl()
         self.playback_control.set_mood()
-        #self.setStyleSheet("background-color: yellow;")
-
-        self.button_return = QPushButton("<--")
-        self.button_return.setFixedSize(85, 30) 
-        #self.button_return.clicked.connect(self.play)
-
+        '''
+        self.setStyleSheet("color: white;"
+                         "background-color: black;"
+                         "selection-color: yellow;"
+                         "selection-background-color: yellow;")  
+'''
         self.button = QPushButton("Play")
         self.button.setCheckable(True)   
         self.button.setFixedSize(85, 30) 
         self.button.clicked.connect(self.play)
+
+        self.button_return = QPushButton("<--")
+        self.button_return.setFixedSize(85, 30) 
+        #self.button_return.clicked.connect(self.play)
 
         self.skeep = QPushButton("-->") 
         self.skeep.setFixedSize(85, 30) 
@@ -229,6 +240,8 @@ class MainWindow(QWidget):
         self.playback_control.set_mood(currentText)
         title = self.playback_control.get_title()
         self.name.setText(title)
+
+
 #if __name__ == '__main__':  
 
 
