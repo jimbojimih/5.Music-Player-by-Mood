@@ -1,9 +1,10 @@
 import os
 import json
 
-from ytmusicapi import YTMusic
 import pafy
-from PyQt6.QtCore import Qt
+from ytmusicapi import YTMusic
+from PyQt6.QtGui import QIcon, QFont
+from PyQt6.QtCore import QSize, Qt, QTimer
 from PyQt6.QtWidgets import (  
         QPushButton,
         QMainWindow,
@@ -13,7 +14,10 @@ from PyQt6.QtWidgets import (
         QWidget,
         QComboBox,
         QSlider,
-        QLabel)
+        QLabel,
+        QMenuBar,
+        QMenu
+)
 
 basepath = os.path.dirname(os.path.abspath(__file__))
 dllspath = os.path.join(basepath, 'dlls')
@@ -26,36 +30,22 @@ class PlayListCreator():
     def __init__(self):
         self.play_lists_json = {}
         self.ytmusic = YTMusic()         
+        self.ytmusic.setup
 
     def create_mood_param_dict(self):
-        '''Get a dictionary with mood parameters. 
-
-        Example: "{'Chill': 'ggMPOg1uX0prdzllTXdBWmdM'..."
-
-        '''
-        self.ytmusic.setup
+        '''Get a dictionary with mood parameters.'''        
         mood_dict = self.ytmusic.get_mood_categories()
         for mood in mood_dict['Moods & moments']:
-            self.play_lists_json[mood['title']] = mood['params']
+            self.play_lists_json[mood['title']] = mood['params']  
 
     def create_mood_playlists_id_dict(self):
-        '''Get a dictionary with mood playlists.
-
-        Example: "{'Chill': [{'title': 'Russian Lounge', 
-
-                'playlistId': 'RDCLAK5uy_lFLL3kvPVwDnLJYBQuRmtP3-1_w63yUS'..."
-
-        '''
+        '''Get a dictionary with mood playlists.'''
         self.create_mood_param_dict()
         for mood, params in self.play_lists_json.items():
             self.play_lists_json[mood] = self.ytmusic.get_mood_playlists(params)        
 
     def create_clean_mood_playlists_id_dict(self):
-        '''Get a dictionary with clean mood playlists.
-
-        Example: "{'Chill': ['RDCLAK5uy_lFLL3kvPVwDnLJYBQuRmtP3-1_w63yUS',..."
-
-        '''
+        '''Get a dictionary with clean mood playlists. '''
         self.create_mood_playlists_id_dict()
         for mood, params in self.play_lists_json.items(): 
             list_playlist_id = []   
@@ -64,12 +54,7 @@ class PlayListCreator():
             self.play_lists_json[mood] = list_playlist_id
 
     def create_mood_list_of_video_id_dict(self):
-        '''Get a dictionary with clean mood playlists.
-
-        Example: "{"Chill": [["e4PBKgLlaHk", "WaryKVQ1rhk"], 
-                            [""0ZSWUAOYlSA", "dRHBDPpex1Y"]...
-
-        '''
+        '''Get a dictionary with clean mood playlists.'''
         self.create_clean_mood_playlists_id_dict()
         for mood, params in self.play_lists_json.items():
             list_all_video_id = []
@@ -84,45 +69,20 @@ class PlayListCreator():
 
     def create_json(self):
         self.create_mood_list_of_video_id_dict()
-        with open('play_lists.json', 'w') as hs:
-            json.dump(self.play_lists_json, hs) 
-
-
-class AudioLinkCreator():
-    def open_play_lists_json(self):
-        with open('play_lists.json', 'r') as file:
-            self.videos_id = json.load(file)
-
-    def open_video_id(self, mood, playlist, track):
-        self.video_url = ("https://www.youtube.com/watch?v=" + 
-                        str(self.videos_id[mood][playlist][track]))
-        try: 
-            self.video = pafy.new(self.video_url)
-        except Exception: 
-            self.audio_url = None   
-        else:
-            self.audio = self.video.getbestaudio()
-            self.audio_url = self.audio.url
-            self.audio_title = self.audio.title
-        
-    def get_url(self):
-        return self.audio_url
-
-    def get_title(self):
-        return self.video.title
-
-    def get_len_playlist(self, mood, playlist):
-        return len(self.videos_id[mood][playlist])
+        with open('play_lists.json', 'w') as file:
+            json.dump(self.play_lists_json, file) 
 
 
 class PlaybackControl():
     def __init__(self):
-        #self.mood = 'Chill'
-        self.audio_link = AudioLinkCreator()
-        self.audio_link.open_play_lists_json()        
+        self.player = mpv.MPV(video=False) #ytdl=True  
+        self.player.pause = True 
 
-        self.player = mpv.MPV(ytdl=True) #ytdl=True  
-        self.player.pause = True        
+        self.last_track = LastTrackPlayed()
+
+    def json_load(self):
+        with open('play_lists.json', 'r') as file:
+            self.play_lists_json = json.load(file)       
 
     def play(self, checked):
         self.player.pause = not checked
@@ -130,50 +90,60 @@ class PlaybackControl():
     def set_volume(self, value):
         self.player.volume = value
 
-    def get_title(self):
-        return self.audio_link.get_title()
+    def get_filename(self):
+        return self.player.filename
 
-    def set_mood(self, mood='Chill'):
+    def set_mood(self, mood='Chill'):        
         self.mood = mood
 
-        self.audio_link.open_video_id(self.mood, 0, 0)
-        link = self.audio_link.get_url()
-        self.player.stop()
-        self.player.playlist_clear()
-        self.player.playlist_append(link)
-        #if self.player.playlist[0]['playing'] == False:
-        self.player.playlist_pos = 0
-        #self.playlist_append()
-        print(self.player.playlist[0]['playing'])
+        last = self.last_track.open_the_last_track()
+        pos_track, numb_playlist = last[self.mood]
 
-    def playlist_append(self):
-        len_playlist =  self.audio_link.get_len_playlist(self.mood, 0)
-        for track in range(1, len_playlist):
-            self.audio_link.open_video_id(self.mood, 0, track)
-            link = self.audio_link.get_url()
+        playlist = self.play_lists_json[self.mood][numb_playlist]
+        self.player.stop()
+        self.player.playlist_clear()        
+        for video_id in playlist:
+            link = "https://www.youtube.com/watch?v=" + video_id
             self.player.playlist_append(link)
+        self.player.playlist_pos = pos_track
+        print(self.player.playlist)
+    #def save_the_last_track(self):
+    
 
 class LastTrackPlayed():
-    def save_the_last_track(self):
+    def save_the_last_track(self, last_track):
         with open('last_track.json', 'w') as file:
-            json.dump(self.last_track, file)
+            json.dump(last_track, file)
 
     def open_the_last_track(self):
         with open('last_track.json', 'r') as file:
-            self.last_track = json.load(file)
+            last_track = json.load(file)
+        return last_track
 
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.playback_control = PlaybackControl()
+        self.playback_control.json_load()
         self.playback_control.set_mood()
-        '''
-        self.setStyleSheet("color: white;"
-                         "background-color: black;"
-                         "selection-color: yellow;"
-                         "selection-background-color: yellow;")  
-'''
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.set_title)
+        self.timer.start(500)
+
+        self.about_window = AboutWindow()
+
+        self.menu = QMenuBar()         
+        self.file_menu = QMenu('File')
+        self.menu.addMenu(self.file_menu)
+        self.file_menu.addAction('Update audio sources', lambda: print('a'))
+        self.file_menu.addAction('Reset player save', lambda: print('b'))
+
+        self.about_menu = QMenu('About Easy Player') 
+        self.menu.addMenu(self.about_menu)                
+        self.about_menu.aboutToShow.connect(lambda: self.about_window.show())
+        
         self.button = QPushButton("Play")
         self.button.setCheckable(True)   
         self.button.setFixedSize(85, 30) 
@@ -200,8 +170,8 @@ class MainWindow(QWidget):
         self.choice.addItems(["Romance", "Sleep", "Workout"])
         self.choice.currentTextChanged.connect(self.set_mood)
 
-        title = self.playback_control.get_title()
-        self.name = QLabel(title)
+        self.name = QLabel()
+        self.name.setOpenExternalLinks(True)
         
         layout1 = QHBoxLayout()  
 
@@ -210,21 +180,24 @@ class MainWindow(QWidget):
         layout1.addWidget(self.skeep)
         
         layout2 = QHBoxLayout()
+
         layout2.addWidget(self.slider)        
         layout2.addWidget(self.choice)
 
         layout3 = QVBoxLayout()  
+
+        layout3.setMenuBar(self.menu)
         layout3.addLayout(layout1)  
         layout3.addStretch(1) 
         layout3.addLayout(layout2) 
-        layout3.addStretch(1)    
-                        
+        layout3.addStretch(1)                            
         layout3.addWidget(self.name) 
 
         self.setLayout(layout3)
         self.setWindowTitle("Easy Player")
         self.setFixedWidth(300)
         self.setFixedHeight(130)
+        self.setWindowIcon(QIcon('icon.png'))
         self.show()
 
     def play(self, checked):
@@ -237,17 +210,51 @@ class MainWindow(QWidget):
         self.playback_control.set_volume(value)
 
     def set_mood(self, currentText):
-        self.playback_control.set_mood(currentText)
-        title = self.playback_control.get_title()
-        self.name.setText(title)
+        self.playback_control.set_mood(currentText)  
+
+    def set_title(self):
+        text = 'https://www.youtube.com/' + self.playback_control.get_filename()
+        #url = "<a href=\"http://www.google.com\">'Open on YouTube'</a>"
+        url = "<a href=\"{url}\"> <font color=black>Open on YouTube</a>".format(url=text)
+        self.name.setText(url)
+ 
+    def closeEvent(self, event):
+        print('save')
+        event.accept()
+
+class AboutWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        layout = QVBoxLayout()        
+        text_en = ('A simple music player to listen to music in the background,' 
+                  'depending on your mood. Work is allowed on the playlists of' 
+                  '\nYouTube Music programs. To switch playlist, press --> or <--.'
+                  'When the program is restored again, playback will start from\n' 
+                  'the last played track. To update playlists update,' 
+                  ' click "Update Audio Sources"')
+        text_ru = ('Простой музыкальный плеер для фонового прослушивания ' 
+                  'музыки, в зависимости от выбранного настроения.\nРабота '
+                  'программы основана на плейлистах YouTube Music. Для '
+                  'переключения плейлиста нажмите --> или <--.\nПри повторном '
+                  'запуске программы, вопроизведение начнётся с последнего '
+                  'воспоизведённого трека.\nДля обновления обновления плейлистов '
+                  'нажмите "Update audio sources"')
+        self.label_en = QLabel(text_en)
+        self.label_en.setFont(QFont('Arial', 11))
+        self.label_ru = QLabel(text_ru)
+        self.label_ru.setFont(QFont('Arial', 11))
+        layout.addWidget(self.label_en)
+        layout.addStretch(1)
+        layout.addWidget(self.label_ru)
+        self.setLayout(layout)
+        self.setWindowIcon(QIcon('icon.png'))
+
+if __name__ == '__main__':  
 
 
-#if __name__ == '__main__':  
+    app = QApplication([])
 
+    window = MainWindow()
+    window.show()
 
-app = QApplication([])
-
-window = MainWindow()
-window.show()
-
-app.exec()
+    app.exec()
