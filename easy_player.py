@@ -1,7 +1,6 @@
 import os
 import json
 
-import pafy
 from ytmusicapi import YTMusic
 from PyQt6.QtGui import QIcon, QFont
 from PyQt6.QtCore import QSize, Qt, QTimer
@@ -75,10 +74,11 @@ class PlayListCreator():
 
 class PlaybackControl():
     def __init__(self):
-        self.player = mpv.MPV(video=False) #ytdl=True  
-        self.player.pause = True 
+        self.player = mpv.MPV(video=False)
+        self.player.pause = True
 
-        self.last_track = LastTrackPlayed()
+        self.last_tracks_played = LastTracksPlayed()
+        self.last_tracks = self.last_tracks_played.open()
 
     def json_load(self):
         with open('play_lists.json', 'r') as file:
@@ -93,29 +93,36 @@ class PlaybackControl():
     def get_filename(self):
         return self.player.filename
 
-    def set_mood(self, mood='Chill'):        
+    def set_mood(self, mood): 
         self.mood = mood
 
-        last = self.last_track.open_the_last_track()
-        pos_track, numb_playlist = last[self.mood]
-
-        playlist = self.play_lists_json[self.mood][numb_playlist]
         self.player.stop()
-        self.player.playlist_clear()        
+        self.player.playlist_clear()
+        
+        pos_track, self.numb_playlist = self.last_tracks[self.mood]
+        playlist = self.play_lists_json[self.mood][self.numb_playlist]       
+
         for video_id in playlist:
             link = "https://www.youtube.com/watch?v=" + video_id
             self.player.playlist_append(link)
-        self.player.playlist_pos = pos_track
-        print(self.player.playlist)
-    #def save_the_last_track(self):
+
+        self.player.playlist_pos = pos_track   
+        #print(self.player.playlist_count)
+        #print(self.player.playlist_pos)
+
+    def update_last_tracks_played(self):
+        self.last_tracks[self.mood] = [self.player.playlist_pos, self.numb_playlist]
+
+    def save_the_last_track(self):
+        self.last_tracks_played.save(self.last_tracks)
     
 
-class LastTrackPlayed():
-    def save_the_last_track(self, last_track):
+class LastTracksPlayed():
+    def save(self, last_tracks):
         with open('last_track.json', 'w') as file:
-            json.dump(last_track, file)
+            json.dump(last_tracks, file)
 
-    def open_the_last_track(self):
+    def open(self):
         with open('last_track.json', 'r') as file:
             last_track = json.load(file)
         return last_track
@@ -126,10 +133,11 @@ class MainWindow(QWidget):
         super().__init__()
         self.playback_control = PlaybackControl()
         self.playback_control.json_load()
-        self.playback_control.set_mood()
+        self.playback_control.set_mood('Chill')
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.set_title)
+        self.timer.timeout.connect(lambda: self.playback_control.update_last_tracks_played())
         self.timer.start(500)
 
         self.about_window = AboutWindow()
@@ -138,22 +146,27 @@ class MainWindow(QWidget):
         self.file_menu = QMenu('File')
         self.menu.addMenu(self.file_menu)
         self.file_menu.addAction('Update audio sources', lambda: print('a'))
-        self.file_menu.addAction('Reset player save', lambda: print('b'))
+        self.file_menu.addAction('Reset the save', lambda: print('b'))
 
         self.about_menu = QMenu('About Easy Player') 
         self.menu.addMenu(self.about_menu)                
         self.about_menu.aboutToShow.connect(lambda: self.about_window.show())
         
         self.button = QPushButton("Play")
+        #self.button.setStyleSheet('border-style: solid; border-width: 1px; border-color: black; border-radius: 15px')
         self.button.setCheckable(True)   
         self.button.setFixedSize(85, 30) 
         self.button.clicked.connect(self.play)
 
         self.button_return = QPushButton("<--")
+        #self.button_return.setStyleSheet('border-style: solid; border-width: 1px; border-color: black; border-radius: 15px')
         self.button_return.setFixedSize(85, 30) 
         #self.button_return.clicked.connect(self.play)
 
         self.skeep = QPushButton("-->") 
+        self.skeep.radius = 170
+        #self.skeep.setStyleSheet('border-style: solid; border-width: 1px; border-color: black; border-radius: 15px')
+
         self.skeep.setFixedSize(85, 30) 
         #self.skeep.clicked.connect(self.play)
 
@@ -164,6 +177,8 @@ class MainWindow(QWidget):
         self.slider.valueChanged.connect(self.volume)
 
         self.choice = QComboBox()
+        #self.choice.setStyleSheet('border-style: solid; border-width: 1px; border-color: black;')
+
         self.choice.setFixedSize(100, 30)
         self.choice.addItems(["Chill", "Commute", "Energy Boosters"])
         self.choice.addItems(["Feel Good", "Focus", "Party"])
@@ -219,7 +234,7 @@ class MainWindow(QWidget):
         self.name.setText(url)
  
     def closeEvent(self, event):
-        print('save')
+        self.playback_control.save_the_last_track()
         event.accept()
 
 class AboutWindow(QWidget):
@@ -244,7 +259,6 @@ class AboutWindow(QWidget):
         self.label_ru = QLabel(text_ru)
         self.label_ru.setFont(QFont('Arial', 11))
         layout.addWidget(self.label_en)
-        layout.addStretch(1)
         layout.addWidget(self.label_ru)
         self.setLayout(layout)
         self.setWindowIcon(QIcon('icon.png'))
