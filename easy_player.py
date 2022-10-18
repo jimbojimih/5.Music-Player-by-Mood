@@ -80,8 +80,7 @@ class PlaybackControl():
         self.player = mpv.MPV(video=False, ytdl=True)
         self.player.pause = True
 
-        #last_tracks_played = LastTracksPlayed()
-        self.last_tracks = LastTracksPlayed.open()
+        #self.last_tracks = LastTracksPlayed.open()
 
         self.play_list_load()
 
@@ -101,16 +100,19 @@ class PlaybackControl():
         self.player.stop()
         self.player.playlist_clear()
         
+        self.last_tracks = LastTracksPlayed.open()
         pos_track, self.numb_playlist = self.last_tracks[self.mood]
-        playlist = self.play_lists_json[self.mood][self.numb_playlist]       
 
-        for video_id in playlist:
+        current_playlist = self.play_lists_json[self.mood][self.numb_playlist]       
+
+        for video_id in current_playlist:
             link = "https://www.youtube.com/watch?v=" + video_id
             self.player.playlist_append(link)
 
         self.player.playlist_pos = pos_track
 
     def update_last_tracks_played(self):
+        '''Update in GUI'''
         self.last_tracks[self.mood] = [self.player.playlist_pos, self.numb_playlist]
 
     def turn_on_the_next_playlist(self):
@@ -119,9 +121,9 @@ class PlaybackControl():
             self.player.stop()
             self.player.playlist_clear()
             self.numb_playlist += 1
-            playlist = self.play_lists_json[self.mood][self.numb_playlist]
+            current_playlist = self.play_lists_json[self.mood][self.numb_playlist]
 
-            for video_id in playlist:
+            for video_id in current_playlist:
                 link = "https://www.youtube.com/watch?v=" + video_id
                 self.player.playlist_append(link)
 
@@ -133,9 +135,9 @@ class PlaybackControl():
             self.player.stop()
             self.player.playlist_clear()
             self.numb_playlist -= 1
-            playlist = self.play_lists_json[self.mood][self.numb_playlist]
+            current_playlist = self.play_lists_json[self.mood][self.numb_playlist]
 
-            for video_id in playlist:
+            for video_id in current_playlist:
                 link = "https://www.youtube.com/watch?v=" + video_id
                 self.player.playlist_append(link)
 
@@ -147,11 +149,16 @@ class PlaybackControl():
 
     def check_the_last_track(self):
         if self.player.playlist_pos == -1:
-            self.turn_on_the_next_playlist()    
+            self.turn_on_the_next_playlist()  
 
+    def reset(self):
+        self.last_tracks = {"Chill": [0, 0], "Commute": [0, 0], "Energy Boosters": [0, 0], "Feel Good": [0, 0], "Focus": [0, 0], "Party": [0, 0], "Romance": [0, 0], "Sleep": [0, 0], "Workout": [0, 0]}
+        self.save_the_last_track()
+        self.set_mood(self.mood)
+        
     def save_the_last_track(self):
         LastTracksPlayed.save(self.last_tracks)
-    
+        
 
 class LastTracksPlayed():
     @staticmethod
@@ -164,12 +171,6 @@ class LastTracksPlayed():
         with open('last_track.json', 'r') as file:
             last_track = json.load(file)
         return last_track
-
-    @staticmethod
-    #don't WORK!!! надо чтобы он забрал ласт трек из памяти и обнулил тоже
-    def reset():
-        reset_last_track_played = {"Chill": [0, 0], "Commute": [0, 0], "Energy Boosters": [0, 0], "Feel Good": [0, 0], "Focus": [0, 0], "Party": [0, 0], "Romance": [0, 0], "Sleep": [0, 0], "Workout": [0, 0]}
-        LastTracksPlayed.save(reset_last_track_played)
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -189,7 +190,7 @@ class MainWindow(QWidget):
         self.file_menu = QMenu('File')
         self.menu.addMenu(self.file_menu)
         self.file_menu.addAction('Update playlist', self.update_play_list)
-        self.file_menu.addAction('Reset the save of lasts tracks played', lambda: LastTracksPlayed.reset())
+        self.file_menu.addAction('Reset the save of lasts tracks played', lambda: self.playback_control.reset())
 
         self.menu.addAction('About Easy Player', self.show_about_app_window)              
         
