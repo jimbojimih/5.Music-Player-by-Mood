@@ -80,7 +80,7 @@ class PlaybackControl():
         self.player = mpv.MPV(video=False, ytdl=True)
         self.player.pause = True
 
-        #self.last_tracks = LastTracksPlayed.open()
+        self.last_tracks = LastTracksPlayed.open()
 
         self.play_list_load()
 
@@ -100,7 +100,6 @@ class PlaybackControl():
         self.player.stop()
         self.player.playlist_clear()
         
-        self.last_tracks = LastTracksPlayed.open()
         pos_track, self.numb_playlist = self.last_tracks[self.mood]
 
         current_playlist = self.play_lists_json[self.mood][self.numb_playlist]       
@@ -153,7 +152,6 @@ class PlaybackControl():
 
     def reset(self):
         self.last_tracks = {"Chill": [0, 0], "Commute": [0, 0], "Energy Boosters": [0, 0], "Feel Good": [0, 0], "Focus": [0, 0], "Party": [0, 0], "Romance": [0, 0], "Sleep": [0, 0], "Workout": [0, 0]}
-        self.save_the_last_track()
         self.set_mood(self.mood)
         
     def save_the_last_track(self):
