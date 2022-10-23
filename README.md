@@ -21,6 +21,6 @@
 - Код полностью готов к сборке с помощью pyinstaller. 
 Для этого введите команду – pyinstaller --onefile --icon=icon.ico --collect-all "ytmusicapi" --add-binary "yt-dlp.exe;." --noconsole --add-data "dlls/mpv-2.dll;." --add-data "icon.png;." easy_player.py
 
-- Библиотеку, необходимую для работы MPV, скачать тут https://sourceforge.net/projects/mpv-player-windows/files/libmpv/
-yt-dlp.exe, необходимый для работы ytmusicapi, скачать тут https://github.com/yt-dlp/yt-dlp
+- Библиотеку, необходимую для работы MPV, скачать тут https://sourceforge.net/projects/mpv-player-windows/files/libmpv/ Библиотеку необходимо поместить в папку "dlls" в папке проекта.  
+yt-dlp.exe, необходимый для работы ytmusicapi, скачать тут https://github.com/yt-dlp/yt-dlp  
 Затем поместите в один каталог вместе с .exe два файла: play_lists.json и last_track.json. 
