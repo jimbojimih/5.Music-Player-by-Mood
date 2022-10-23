@@ -21,8 +21,8 @@ where [Video_id1 , Video_id2…] is a single YouTube Music playlist.
 yt-dlp.exe required for ytmusicapi to work, download here https://github.com/yt-dlp/yt-dlp
 
 - The code is completely ready to build with pyinstaller.
-To do this, enter the command
-**pyinstaller --onefile --icon=icon.ico --collect-all "ytmusicapi" --add-binary "yt-dlp.exe;." --noconsole --add-data "dlls/mpv-2.dll;." --add-data "icon.png;." easy_player.py**
+To do this, enter the command  
+**pyinstaller --onefile --icon=icon.ico --collect-all "ytmusicapi" --add-binary "yt-dlp.exe;." --noconsole --add-data "dlls/mpv-2.dll;." --add-data "icon.png;." easy_player.py**  
 Then place two files, play_lists.json and last_track.json, in the same directory as the .exe executable.
 ---
 Простой музыкальный плеер с графическим интерфейсом(PyQy6) для прослушивания музыки, в зависимости от выбранного настроения. Работа программы основана на плейлистах YouTube Music. 
