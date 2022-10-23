@@ -18,7 +18,7 @@
 
 - Для установки необходимых модулей введите команду (желательно в виртуально среде) – pip install python-mpv ytmusicapi PyQt6 youtube-dl pyinstaller
 
-- «!»Код полностью готов к сборке с помощью pyinstaller. 
+- Код полностью готов к сборке с помощью pyinstaller. 
 Для этого введите команду – pyinstaller --onefile --icon=icon.ico --collect-all "ytmusicapi" --add-binary "yt-dlp.exe;." --noconsole --add-data "dlls/mpv-2.dll;." --add-data "icon.png;." easy_player.py
 
 - Библиотеку, необходимую для работы MPV, скачать тут https://sourceforge.net/projects/mpv-player-windows/files/libmpv/
