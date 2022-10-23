@@ -9,7 +9,7 @@
 >>4)	Класс LastTracksPlayed загружает и сохраняет последние проигранные треки.
 
 - Video_id треков сохраняется в play_lists.json в следующем виде:
-<{Mood_1: [[Video_id1 , Video_id2…], [Video_id1 , Video_id2…]… >
+<{Mood_1: [[Video_id1 , Video_id2…], [Video_id1 , Video_id2…]… >  
 Где [Video_id1 , Video_id2…] является отдельным плейлистом YouTube Music.
 
 - Последние прослушанные треки сохраняется в last_track.json в следующем виде:
