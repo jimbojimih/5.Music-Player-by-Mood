@@ -1,6 +1,6 @@
 # 5.Music-Player-by-Mood
 ---
-- Простой музыкальный плеер с графическим интерфейсом(PyQy6) для прослушивания музыки, в зависимости от выбранного настроения. Работа программы основана на плейлистах YouTube Music. 
+Простой музыкальный плеер с графическим интерфейсом(PyQy6) для прослушивания музыки, в зависимости от выбранного настроения. Работа программы основана на плейлистах YouTube Music. 
 
 Принцип работы следующий: 
 >1)	Класс PlayListCreator создаёт json-файл, состоящий из video_id треков, на основе которых генерируются ссылки на YouTube Music.
@@ -22,6 +22,6 @@
 - Код полностью готов к сборке с помощью pyinstaller. 
 Для этого введите команду – pyinstaller --onefile --icon=icon.ico --collect-all "ytmusicapi" --add-binary "yt-dlp.exe;." --noconsole --add-data "dlls/mpv-2.dll;." --add-data "icon.png;." easy_player.py
 
-Библиотеку, необходимую для работы MPV, скачать тут https://sourceforge.net/projects/mpv-player-windows/files/libmpv/
+- Библиотеку, необходимую для работы MPV, скачать тут https://sourceforge.net/projects/mpv-player-windows/files/libmpv/
 yt-dlp.exe, необходимый для работы ytmusicapi, скачать тут https://github.com/yt-dlp/yt-dlp
 Затем поместите в один каталог вместе с .exe два файла: play_lists.json и last_track.json. 
