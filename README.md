@@ -8,17 +8,17 @@
 >3)	Класс MainWindow создаёт графический интерфейс.
 >4)	Класс LastTracksPlayed загружает и сохраняет последние проигранные треки.
 >5) Video_id треков сохраняется в play_lists.json в следующем виде:  
-**{Mood_1: [[Video_id1 , Video_id2…], [Video_id1 , Video_id2…]…**  
+**{Mood_1: [[Video_id1 , Video_id2…], [Video_id1 , Video_id2…],…**  
 где [Video_id1 , Video_id2…] является отдельным плейлистом YouTube Music.
 >6) Последние прослушанные треки сохраняется в last_track.json в следующем виде:  
-**{ Mood_1: [0, 1]…**  
+**{ Mood_1: [0, 1],…**  
 >где 0 – номер трека в плейлисте, 1 – номер плейлиста для выбранного настроения.
 
 - Существует возможность обновления плейлистов («update_play_list» button). Обновление происходит в отельном потоке, не влияющем на работу плеера.
 
 - Для установки необходимых модулей введите команду (желательно в виртуально среде) – pip install python-mpv ytmusicapi PyQt6 youtube-dl pyinstaller
 
-- Код полностью готов к сборке с помощью pyinstaller. 
+- «!»Код полностью готов к сборке с помощью pyinstaller. 
 Для этого введите команду – pyinstaller --onefile --icon=icon.ico --collect-all "ytmusicapi" --add-binary "yt-dlp.exe;." --noconsole --add-data "dlls/mpv-2.dll;." --add-data "icon.png;." easy_player.py
 
 - Библиотеку, необходимую для работы MPV, скачать тут https://sourceforge.net/projects/mpv-player-windows/files/libmpv/
