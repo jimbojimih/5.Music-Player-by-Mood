@@ -1,5 +1,13 @@
 import os
+
+basepath = os.path.dirname(os.path.abspath(__file__))
+dllspath = os.path.join(basepath, 'dlls')
+os.environ['PATH'] = dllspath + os.pathsep + os.environ['PATH']
+
+icon_png = os.path.abspath(os.path.join(os.path.dirname(__file__), 'icon.png'))
+
 import json
+import mpv
 
 from ytmusicapi import YTMusic
 from PyQt6.QtGui import QIcon, QFont
@@ -8,12 +16,6 @@ from PyQt6.QtWidgets import (
         QPushButton, QMainWindow, QApplication, QVBoxLayout, QHBoxLayout,
         QWidget, QComboBox, QSlider, QLabel, QMenuBar, QMenu, QMessageBox,
 )
-
-basepath = os.path.dirname(os.path.abspath(__file__))
-dllspath = os.path.join(basepath, 'dlls')
-os.environ['PATH'] = dllspath + os.pathsep + os.environ['PATH']
-
-import mpv
 
 
 class PlayListCreator(QThread):
@@ -178,7 +180,7 @@ class MainWindow(QWidget):
         self.setWindowTitle("Easy Player")
         self.setFixedWidth(300)
         self.setFixedHeight(130)
-        self.setWindowIcon(QIcon('icon.png')) 
+        self.setWindowIcon(QIcon(icon_png)) 
 
         self.init_ui()
 
@@ -287,7 +289,7 @@ class MainWindow(QWidget):
                 'you can switch the playlist. To do this, press --> or <-- '
                 'When the program is restored again, playback will start '
                 'from the last played track. To update playlists, ' 
-                'click "Update Audio Sources" \n\n'
+                'click "Update playlist" \n\n'
                 'Простой музыкальный плеер для фонового прослушивания ' 
                 'музыки, в зависимости от выбранного настроения. Работа '
                 'программы основана на плейлистах YouTube Music. Если ' 
@@ -295,7 +297,7 @@ class MainWindow(QWidget):
                 'плейлист. Для этого нажмите --> или <--. При повторном '
                 'запуске программы, вопроизведение начнётся с последнего '
                 'воспоизведённого трека. Для обновления плейлистов '
-                'нажмите "Update audio sources"')
+                'нажмите "Update playlist"')
 
         QMessageBox.information(self, text_title, text)
 
