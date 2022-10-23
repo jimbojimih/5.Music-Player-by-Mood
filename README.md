@@ -23,5 +23,5 @@ yt-dlp.exe, необходимый для работы ytmusicapi, скачат�
 
 - Код полностью готов к сборке с помощью pyinstaller. 
 Для этого введите команду   
-– pyinstaller --onefile --icon=icon.ico --collect-all "ytmusicapi" --add-binary "yt-dlp.exe;." --noconsole --add-data "dlls/mpv-2.dll;." --add-data "icon.png;." easy_player.py   
+**pyinstaller --onefile --icon=icon.ico --collect-all "ytmusicapi" --add-binary "yt-dlp.exe;." --noconsole --add-data "dlls/mpv-2.dll;." --add-data "icon.png;." easy_player.py**   
 Затем поместите в один каталог вместе с исполняемым файлом .exe два файла: play_lists.json и last_track.json. 
