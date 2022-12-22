@@ -18,7 +18,7 @@ where [Video_id1 , Video_id2…] is a single YouTube Music playlist.
 - To install the necessary modules, enter the command (preferably in a virtual environment) - pip install python-mpv ytmusicapi PyQt6 youtube-dl pyinstaller
 
 - Download the library required for MPV to work here https://sourceforge.net/projects/mpv-player-windows/files/libmpv/ The library must be placed in the "dlls" folder in the project folder.
-yt-dlp.exe required for ytmusicapi to work, download here https://github.com/yt-dlp/yt-dlp
+yt-dlp.exe required for MPV(ytdl=True) to work, download here https://github.com/yt-dlp/yt-dlp
 
 - The code is completely ready to build with pyinstaller.
 To do this, enter the command  
@@ -44,7 +44,7 @@ Then place two files, play_lists.json and last_track.json, in the same directory
 - Для установки необходимых модулей введите команду (желательно в виртуально среде) – pip install python-mpv ytmusicapi PyQt6 youtube-dl pyinstaller
 
 - Библиотеку, необходимую для работы MPV, скачать тут https://sourceforge.net/projects/mpv-player-windows/files/libmpv/ Библиотеку необходимо поместить в папку "dlls" в папке проекта.  
-yt-dlp.exe, необходимый для работы ytmusicapi, скачать тут https://github.com/yt-dlp/yt-dlp  
+yt-dlp.exe, необходимый для работы MPV(ytdl=True), скачать тут https://github.com/yt-dlp/yt-dlp  
 
 - Код полностью готов к сборке с помощью pyinstaller. 
 Для этого введите команду   
