@@ -24,6 +24,8 @@ yt-dlp.exe required for MPV(ytdl=True) to work, download here https://github.com
 To do this, enter the command  
 **pyinstaller --onefile --icon=icon.ico --collect-all "ytmusicapi" --add-binary "yt-dlp.exe;." --noconsole --add-data "dlls/mpv-2.dll;." --add-data "icon.png;." easy_player.py**  
 Then place two files, play_lists.json and last_track.json, in the same directory as the .exe executable.
+
+To download the .exe file follow to https://sourceforge.net/projects/a-simple-music-player/
 ---
 Простой музыкальный плеер с графическим интерфейсом(PyQy6) для прослушивания музыки, в зависимости от выбранного настроения. Работа программы основана на плейлистах YouTube Music. 
 
@@ -50,3 +52,5 @@ yt-dlp.exe, необходимый для работы MPV(ytdl=True), скач�
 Для этого введите команду   
 **pyinstaller --onefile --icon=icon.ico --collect-all "ytmusicapi" --add-binary "yt-dlp.exe;." --noconsole --add-data "dlls/mpv-2.dll;." --add-data "icon.png;." easy_player.py**   
 Затем поместите в один каталог вместе с исполняемым файлом .exe два файла: play_lists.json и last_track.json. 
+
+Скачать .exe можно тут: https://sourceforge.net/projects/a-simple-music-player/
