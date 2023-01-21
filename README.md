@@ -55,4 +55,4 @@ yt-dlp.exe, необходимый для работы MPV(ytdl=True), скач�
 
 Скачать .exe можно тут: https://sourceforge.net/projects/a-simple-music-player/
 
-![Image text](https://github.com/jimbojimih/4.Music-Player-by-Mood/blob/master/2.jpg)
+![Image text](https://github.com/jimbojimih/4.Music-Player-by-Mood/blob/master/1.jpg)
