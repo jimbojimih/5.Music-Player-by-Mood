@@ -1,6 +1,6 @@
 # 5.Music-Player-by-Mood
 A simple music player with a GUI (PyQy6) to listen to music, depending on the selected mood. The program is based on YouTube Music playlists.
-![Image text](https://github.com/jimbojimih/4.Music-Player-by-Mood/blob/master/1.jpg) ![Image text](https://github.com/jimbojimih/4.Music-Player-by-Mood/blob/master/2.jpg)
+
 - The working principle is as follows:
 >1) The PlayListCreator class creates a json file consisting of the video_id of the tracks, based on which links to YouTube Music are generated.
 >2) The PlaybackControl class controls the playback of tracks. Switching between playlists happens automatically.
@@ -54,3 +54,5 @@ yt-dlp.exe, необходимый для работы MPV(ytdl=True), скач�
 Затем поместите в один каталог вместе с исполняемым файлом .exe два файла: play_lists.json и last_track.json. 
 
 Скачать .exe можно тут: https://sourceforge.net/projects/a-simple-music-player/
+
+![Image text](https://github.com/jimbojimih/4.Music-Player-by-Mood/blob/master/2.jpg)
