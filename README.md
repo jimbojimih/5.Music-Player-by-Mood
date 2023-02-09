@@ -1,4 +1,4 @@
-# 5.Music-Player-by-Mood
+# Music-Player-by-Mood
 A simple music player with a GUI (PyQy6) to listen to music, depending on the selected mood. The program is based on YouTube Music playlists.
 
 - The working principle is as follows:
